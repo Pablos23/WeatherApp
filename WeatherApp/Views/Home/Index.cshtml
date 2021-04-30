@@ -1,0 +1,89 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to Weather App</h1>
+    <p>Please enter you Postal Address</p>
+    <input type="text" id="searchText" />
+    <input id="sendButton" type="button" value="Submit" />
+    <h1 class="display-4" id="City" style="color:#328894;margin-top:25px;"></h1>
+    <ul class="grid-container" id="baseList">
+    </ul>
+</div>
+<div class="loader-backgroud" id="loaderBackground" style="display:none;"></div>
+<div class="loader" id="loader" style="display:none;"></div>
+<script type="text/javascript">
+    $('#sendButton').on("click", function () {
+        var uri = $("#searchText").val();
+        $("#loader").show();
+        $("#loaderBackground").show();
+        $.ajax({
+            url: "/Home/GetGeoCoordinates",
+            type: "GET",
+            data: { address: uri },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (result) {
+                if (result.success) {
+                    $("#baseList").empty();
+                    $("#City").html(result.city);
+                    for (var i = 0; i < result.data.length; i++) {
+                        var element = `<li class="grid-item"><div class="card {CardClass}"> <img class="image-forecast" src="{Image}"/></div><div title="{DescriptionFull}" class="status"><p>{Name}</p><p>{temperature} &#8457;</p><p>{Description}</p></div></li>`;
+                        element = element.replace("{temperature}", result.data[i].temperature);
+                        element = element.replace("{Description}", result.data[i].shortForecast);
+                        element = element.replace("{DescriptionFull}", result.data[i].detailedForecast);
+                        element = element.replace("{Name}", result.data[i].name);
+                        element = element.replace("{Image}", result.data[i].icon);
+                        element = element.replace("{CardClass}", !result.data[i].isDaytime ? "card-night" : "card-sunny");
+                        element = element.replace("{TimeDay}", !result.data[i].isDaytime ? "night" : "sunny");
+                        $("#baseList").append(element);
+                    }
+                } else {
+                    $("#baseList").empty();
+                    $("#City").empty();
+                    alert("Any result for your entry, please check and retry.");
+                    console.log(result);
+                }
+                $("#loader").hide();
+                $("#loaderBackground").hide();
+            }
+        })
+    })
+</script>
+@*<li class="grid-item">
+        <div class="card card-rain">
+            <div class="rain"></div>
+        </div>
+        <div class="status">
+            <p>71 &#8457;</p>
+            <p>Showers</p>
+        </div>
+    </li>
+    <li class="grid-item">
+        <div class="card card-snow">
+            <div class="snow"></div>
+        </div>
+        <div class="status">
+            <p>71 &#8457;</p>
+            <p>Light flurry</p>
+        </div>
+    </li>
+    <li class="grid-item">
+        <div class="card card-storm">
+            <div class="storm"></div>
+        </div>
+        <div class="status">
+            <p>71 &#8457;</p>
+            <p>Thunderstorms</p>
+        </div>
+    </li>
+    <li class="grid-item">
+        <div class="card card-sunny">
+            <div class="sunny"></div>
+        </div>
+        <div class="status">
+            <p>71 &#8457;</p>
+            <p>Mostly sunny</p>
+        </div>
+    </li>*@
